@@ -221,242 +221,6 @@
     }
 
 
-    function buildShareText(data) {
-    
-      let reply = '';
-    
-      // จำนวนข้อมูล
-      const matchedCount =
-        data.matchedCount || 1;
-    
-      reply +=
-        '🔎 พบข้อมูลจำนวน ' +
-        matchedCount +
-        ' แถว\n';
-    
-      reply +=
-        '━━━━━━━━━━━━━━\n';
-    
-      // ชื่อ Sheet / แถว
-      if (
-        data.sheetName ||
-        data.rowNumber
-      ) {
-    
-        reply +=
-          '📄 ' +
-          (data.sheetName || '') +
-          ' / แถวที่ ' +
-          (data.rowNumber || '') +
-          '\n';
-    
-      }
-    
-      reply +=
-        '━━━━━━━━━━━━━━\n\n';
-    
-    
-      // =========================
-      // ข้อมูลบุคคล
-      // =========================
-    
-      if (
-        data.suspectName &&
-        String(data.suspectName).trim() !== ''
-      ) {
-    
-        reply +=
-          '👤 ชื่อ-สกุล : ' +
-          data.suspectName +
-          '\n';
-    
-      }
-    
-      if (
-        data.idCardNumber &&
-        String(data.idCardNumber).trim() !== ''
-      ) {
-    
-        reply +=
-          '🪪 เลขบัตร/Pass : ' +
-          data.idCardNumber +
-          '\n';
-    
-      }
-    
-      if (
-        data.address &&
-        String(data.address).trim() !== ''
-      ) {
-    
-        reply +=
-          '🏠 ที่อยู่ : ' +
-          data.address +
-          '\n';
-    
-      }
-    
-      reply += '\n';
-    
-    
-      // =========================
-      // ข้อมูลหมายจับ
-      // =========================
-    
-      if (
-        data.policeStation &&
-        String(data.policeStation).trim() !== ''
-      ) {
-    
-        reply +=
-          '🚨 หมายจับ : ' +
-          data.policeStation +
-          '\n';
-    
-      }
-    
-      if (
-        data.warrantNumber &&
-        String(data.warrantNumber).trim() !== ''
-      ) {
-    
-        reply +=
-          '🔢 เลขที่หมายจับ : ' +
-          data.warrantNumber +
-          '\n';
-    
-      }
-    
-      if (
-        data.offense &&
-        String(data.offense).trim() !== ''
-      ) {
-    
-        reply +=
-          '⚖️ ความผิดฐาน : ' +
-          data.offense +
-          '\n';
-    
-      }
-    
-      if (
-        data.criminalCaseNumber &&
-        String(data.criminalCaseNumber).trim() !== ''
-      ) {
-    
-        reply +=
-          '📁 เลขคดีที่ : ' +
-          data.criminalCaseNumber +
-          '\n';
-    
-      }
-    
-      reply += '\n';
-    
-    
-      // =========================
-      // อายุความ / เงินประกัน
-      // =========================
-    
-      if (
-        data.expiration &&
-        String(data.expiration).trim() !== ''
-      ) {
-    
-        reply +=
-          '📅 หมดอายุความ : ' +
-          data.expiration +
-          '\n';
-    
-      }
-    
-      if (
-        data.remainingTime &&
-        String(data.remainingTime).trim() !== ''
-      ) {
-    
-        reply +=
-          '⏳ เหลือเวลา : ' +
-          data.remainingTime +
-          '\n';
-    
-      }
-    
-      if (
-        data.bailAmount &&
-        String(data.bailAmount).trim() !== ''
-      ) {
-    
-        reply +=
-          '💰 เงินประกันศาล : ' +
-          data.bailAmount +
-          ' บาท\n';
-    
-      }
-    
-      reply += '\n';
-    
-    
-      // =========================
-      // สถานะ
-      // =========================
-    
-      if (
-        data.status &&
-        String(data.status).trim() !== ''
-      ) {
-    
-        const statusEmoji =
-          data.statusEmoji || '⚪';
-    
-        reply +=
-          statusEmoji +
-          ' สถานะ : ' +
-          data.status +
-          '\n';
-    
-      }
-    
-    
-      // =========================
-      // หมายเหตุ
-      // =========================
-    
-      if (
-        data.note &&
-        String(data.note).trim() !== ''
-      ) {
-    
-        reply +=
-          '⚠️ หมายเหตุ : ' +
-          data.note +
-          '\n';
-    
-      }
-    
-    
-      // =========================
-      // ไฟล์หมายจับ
-      // =========================
-    
-      if (
-        data.warrantFileLink &&
-        String(data.warrantFileLink).trim() !== ''
-      ) {
-    
-        reply +=
-          '\n👀 ดูไฟล์หมายจับ :\n' +
-          data.warrantFileLink +
-          '\n';
-    
-      }
-    
-    
-      return reply.trim();
-    
-    }
-
-
     // ============================================================
     // โหลดข้อมูลจาก Apps Script API
     // ============================================================
@@ -562,128 +326,746 @@
     }
 
 
-    // ============================================================
-    // แชร์ข้อมูลผ่าน Share Target Picker
-    // ============================================================
-
     async function sharePersonData(data) {
-
+    
       try {
-
+    
         if (
           !liff.isApiAvailable(
             'shareTargetPicker'
           )
         ) {
-
+    
           throw new Error(
             'Share Target Picker ไม่พร้อมใช้งาน'
           );
-
+    
         }
-
-
-        const shareText =
-          buildShareText(data);
-
-
-        const messages = [];
-
-
-        // --------------------------------------------------------
-        // รูปภาพ
-        // --------------------------------------------------------
-
-        if (data.imageUrl) {
-
-          messages.push({
-
-            type: 'image',
-
-            originalContentUrl:
-              data.imageUrl,
-
-            previewImageUrl:
-              data.imageUrl
-
-          });
-
-        }
-
-
-        // --------------------------------------------------------
-        // ข้อความ
-        // --------------------------------------------------------
-
-        messages.push({
-
-          type: 'text',
-
-          text: shareText
-
-        });
-
-
+    
+        const flexMessage =
+          buildShareFlex(data);
+    
         statusElement.textContent =
           '⏳ กำลังเปิดหน้าต่างเลือกผู้รับ...';
-
-
+    
         shareButton.disabled =
           true;
-
-
-        await liff.shareTargetPicker(
-          messages
-        );
-
-
+    
+        await liff.shareTargetPicker([
+          flexMessage
+        ]);
+    
         statusElement.textContent =
           '✅ แชร์ข้อมูลเรียบร้อยแล้ว';
-
-
-        // ปิด LIFF หลังแชร์สำเร็จ
+    
         setTimeout(() => {
-
+    
           try {
-
+    
             liff.closeWindow();
-
+    
           } catch (error) {
-
+    
             console.log(
               'closeWindow error:',
               error
             );
-
+    
           }
-
+    
         }, 800);
-
-
+    
       } catch (error) {
-
+    
         console.error(
           'SHARE ERROR:',
           error
         );
-
-
+    
         statusElement.textContent =
           '❌ แชร์ข้อมูลไม่สำเร็จ\n\n' +
           (
             error.message ||
             String(error)
           );
-
-
+    
         shareButton.disabled =
           false;
+    
+      }
+    
+    }
+
+function buildShareFlex(data) {
+
+  // ==========================================================
+  // กล่องข้อมูลบุคคล
+  // ==========================================================
+
+  const personBox = {
+
+    type: 'box',
+
+    layout: 'vertical',
+
+    spacing: 'sm',
+
+    contents: []
+
+  };
+
+
+  if (data.suspectName) {
+
+    personBox.contents.push({
+
+      type: 'text',
+
+      text:
+        '👤 ชื่อ-สกุล : ' +
+        data.suspectName,
+
+      size: 'sm',
+
+      color: '#333333',
+
+      wrap: true
+
+    });
+
+  }
+
+
+  if (data.idCardNumber) {
+
+    personBox.contents.push({
+
+      type: 'text',
+
+      text:
+        '🪪 เลขบัตร/Pass : ' +
+        data.idCardNumber,
+
+      size: 'sm',
+
+      color: '#333333',
+
+      wrap: true
+
+    });
+
+  }
+
+
+  if (data.address) {
+
+    personBox.contents.push({
+
+      type: 'text',
+
+      text:
+        '🏠 ที่อยู่ : ' +
+        data.address,
+
+      size: 'sm',
+
+      color: '#333333',
+
+      wrap: true
+
+    });
+
+  }
+
+
+  // ==========================================================
+  // กล่องข้อมูลหมายจับ
+  // ==========================================================
+
+  const warrantBox = {
+
+    type: 'box',
+
+    layout: 'vertical',
+
+    spacing: 'sm',
+
+    margin: 'lg',
+
+    contents: []
+
+  };
+
+
+  if (data.policeStation) {
+
+    warrantBox.contents.push({
+
+      type: 'text',
+
+      text:
+        '🚨 หมายจับ : ' +
+        data.policeStation,
+
+      size: 'sm',
+
+      color: '#333333',
+
+      wrap: true
+
+    });
+
+  }
+
+
+  if (data.warrantNumber) {
+
+    warrantBox.contents.push({
+
+      type: 'text',
+
+      text:
+        '🔢 เลขที่หมายจับ : ' +
+        data.warrantNumber,
+
+      size: 'sm',
+
+      color: '#333333',
+
+      wrap: true
+
+    });
+
+  }
+
+
+  if (data.offense) {
+
+    warrantBox.contents.push({
+
+      type: 'text',
+
+      text:
+        '⚖️ ความผิดฐาน : ' +
+        data.offense,
+
+      size: 'sm',
+
+      color: '#333333',
+
+      wrap: true
+
+    });
+
+  }
+
+
+  if (data.criminalCaseNumber) {
+
+    warrantBox.contents.push({
+
+      type: 'text',
+
+      text:
+        '📁 เลขคดีที่ : ' +
+        data.criminalCaseNumber,
+
+      size: 'sm',
+
+      color: '#333333',
+
+      wrap: true
+
+    });
+
+  }
+
+
+  // ==========================================================
+  // กล่องอายุความ / เงินประกัน
+  // ==========================================================
+
+  const expirationBox = {
+
+    type: 'box',
+
+    layout: 'vertical',
+
+    spacing: 'sm',
+
+    margin: 'lg',
+
+    contents: []
+
+  };
+
+
+  if (data.expiration) {
+
+    expirationBox.contents.push({
+
+      type: 'text',
+
+      text:
+        '📅 หมดอายุความ : ' +
+        data.expiration,
+
+      size: 'sm',
+
+      color: '#333333',
+
+      wrap: true
+
+    });
+
+  }
+
+
+  if (data.remainingTime) {
+
+    expirationBox.contents.push({
+
+      type: 'text',
+
+      text:
+        '⏳ เหลือเวลา : ' +
+        data.remainingTime,
+
+      size: 'sm',
+
+      color: '#333333',
+
+      wrap: true
+
+    });
+
+  }
+
+
+  if (data.bailAmount) {
+
+    expirationBox.contents.push({
+
+      type: 'text',
+
+      text:
+        '💰 เงินประกันศาล : ' +
+        data.bailAmount +
+        ' บาท',
+
+      size: 'sm',
+
+      color: '#333333',
+
+      wrap: true
+
+    });
+
+  }
+
+
+  // ==========================================================
+  // กล่องสถานะ + Column X
+  // ==========================================================
+
+  const statusBox = {
+
+    type: 'box',
+
+    layout: 'vertical',
+
+    spacing: 'sm',
+
+    margin: 'lg',
+
+    contents: []
+
+  };
+
+
+  if (data.status) {
+
+    statusBox.contents.push({
+
+      type: 'text',
+
+      text:
+        (data.statusEmoji || '⚪') +
+        ' สถานะ : ' +
+        data.status,
+
+      size: 'sm',
+
+      weight: 'bold',
+
+      color: '#333333',
+
+      wrap: true
+
+    });
+
+  }
+
+
+  statusBox.contents.push({
+
+    type: 'text',
+
+    text:
+      '⭐ ฐานข้อมูล : ' +
+      (
+        data.databaseChecked
+          ? '✅ตรวจพบ'
+          : '❌ตรวจไม่พบ'
+      ),
+
+    size: 'sm',
+
+    weight: 'bold',
+
+    color: '#333333',
+
+    wrap: true
+
+  });
+
+
+  // ==========================================================
+  // หมายเหตุ
+  // ==========================================================
+
+  const noteBox = {
+
+    type: 'box',
+
+    layout: 'vertical',
+
+    margin: 'md',
+
+    contents: []
+
+  };
+
+
+  if (data.note) {
+
+    noteBox.contents.push({
+
+      type: 'text',
+
+      text:
+        '⚠️ หมายเหตุ : ' +
+        data.note,
+
+      size: 'sm',
+
+      color: '#333333',
+
+      wrap: true
+
+    });
+
+  }
+
+
+  // ==========================================================
+  // ลิงก์ไฟล์หมายจับ
+  // ==========================================================
+
+  const fileBox = {
+
+    type: 'box',
+
+    layout: 'vertical',
+
+    margin: 'lg',
+
+    spacing: 'sm',
+
+    contents: []
+
+  };
+
+
+  if (data.warrantFileLink) {
+
+    fileBox.contents.push({
+
+      type: 'separator',
+
+      color: '#800020'
+
+    });
+
+
+    fileBox.contents.push({
+
+      type: 'text',
+
+      text:
+        '👀 ดูไฟล์หมายจับ :',
+
+      size: 'sm',
+
+      weight: 'bold',
+
+      color: '#800020',
+
+      margin: 'lg'
+
+    });
+
+
+    fileBox.contents.push({
+
+      type: 'text',
+
+      text:
+        data.warrantFileLink,
+
+      size: 'xs',
+
+      color: '#0066CC',
+
+      wrap: true,
+
+      action: {
+
+        type: 'uri',
+
+        uri:
+          data.warrantFileLink
 
       }
 
+    });
+
+  }
+
+
+  // ==========================================================
+  // BODY
+  // ==========================================================
+
+  const bodyContents = [];
+
+
+  bodyContents.push({
+
+    type: 'text',
+
+    text:
+      '🔎 พบข้อมูลจำนวน ' +
+      (data.matchedCount || 1) +
+      ' แถว',
+
+    size: 'md',
+
+    weight: 'bold',
+
+    color: '#800020'
+
+  });
+
+
+  bodyContents.push({
+
+    type: 'separator',
+
+    margin: 'md',
+
+    color: '#800020'
+
+  });
+
+
+  bodyContents.push({
+
+    type: 'text',
+
+    text:
+      '📄 ' +
+      (data.sheetName || '') +
+      ' / แถวที่ ' +
+      (data.rowNumber || ''),
+
+    size: 'sm',
+
+    color: '#333333',
+
+    margin: 'md',
+
+    wrap: true
+
+  });
+
+
+  bodyContents.push({
+
+    type: 'separator',
+
+    margin: 'md',
+
+    color: '#800020'
+
+  });
+
+
+  if (
+    personBox.contents.length > 0
+  ) {
+
+    bodyContents.push(
+      personBox
+    );
+
+  }
+
+
+  bodyContents.push({
+
+    type: 'separator',
+
+    margin: 'lg',
+
+    color: '#800020'
+
+  });
+
+
+  if (
+    warrantBox.contents.length > 0
+  ) {
+
+    bodyContents.push(
+      warrantBox
+    );
+
+  }
+
+
+  bodyContents.push({
+
+    type: 'separator',
+
+    margin: 'lg',
+
+    color: '#800020'
+
+  });
+
+
+  if (
+    expirationBox.contents.length > 0
+  ) {
+
+    bodyContents.push(
+      expirationBox
+    );
+
+  }
+
+
+  bodyContents.push(
+    statusBox
+  );
+
+
+  if (
+    noteBox.contents.length > 0
+  ) {
+
+    bodyContents.push(
+      noteBox
+    );
+
+  }
+
+
+  if (
+    fileBox.contents.length > 0
+  ) {
+
+    bodyContents.push(
+      fileBox
+    );
+
+  }
+
+
+  // ==========================================================
+  // FLEX BUBBLE
+  // ==========================================================
+
+  const bubble = {
+
+    type: 'bubble',
+
+    size: 'mega',
+
+    body: {
+
+      type: 'box',
+
+      layout: 'vertical',
+
+      backgroundColor: '#FFF3D6',
+
+      paddingAll: '18px',
+
+      spacing: 'sm',
+
+      contents:
+        bodyContents
+
     }
 
+  };
 
+
+  // ==========================================================
+  // รูปใบหน้า
+  // ==========================================================
+
+  if (data.imageUrl) {
+
+    bubble.hero = {
+
+      type: 'image',
+
+      url:
+        data.imageUrl,
+
+      size: 'full',
+
+      aspectRatio: '4:3',
+
+      aspectMode: 'fit'
+
+    };
+
+  }
+
+
+  // ==========================================================
+  // FLEX MESSAGE
+  // ==========================================================
+
+  return {
+
+    type: 'flex',
+
+    altText:
+      'ข้อมูลบุคคล ' +
+      (data.suspectName || ''),
+
+    contents:
+      bubble
+
+  };
+
+}
+    
     // ============================================================
     // Event ปุ่ม Share
     // ============================================================
