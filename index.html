@@ -396,6 +396,136 @@
     
     }
 
+    function buildShareText(data) {
+
+  let text = '';
+
+  text +=
+    '🔎 พบข้อมูลจำนวน ' +
+    (data.matchedCount || 1) +
+    ' แถว\n';
+
+  text += '━━━━━━━━━━━━━━\n';
+
+  text +=
+    '📄 ' +
+    (data.sheetName || '') +
+    ' / แถวที่ ' +
+    (data.rowNumber || '') +
+    '\n';
+
+  text += '━━━━━━━━━━━━━━\n\n';
+
+  if (data.suspectName) {
+    text +=
+      '👤 ชื่อ-สกุล : ' +
+      data.suspectName +
+      '\n';
+  }
+
+  if (data.idCardNumber) {
+    text +=
+      '🪪 เลขบัตร/Pass : ' +
+      data.idCardNumber +
+      '\n';
+  }
+
+  if (data.address) {
+    text +=
+      '🏠 ที่อยู่ : ' +
+      data.address +
+      '\n';
+  }
+
+  text += '\n';
+
+  if (data.policeStation) {
+    text +=
+      '🚨 หมายจับ : ' +
+      data.policeStation +
+      '\n';
+  }
+
+  if (data.warrantNumber) {
+    text +=
+      '🔢 เลขที่หมายจับ : ' +
+      data.warrantNumber +
+      '\n';
+  }
+
+  if (data.offense) {
+    text +=
+      '⚖️ ความผิดฐาน : ' +
+      data.offense +
+      '\n';
+  }
+
+  if (data.criminalCaseNumber) {
+    text +=
+      '📁 เลขคดีที่ : ' +
+      data.criminalCaseNumber +
+      '\n';
+  }
+
+  text += '\n';
+
+  if (data.expiration) {
+    text +=
+      '📅 หมดอายุความ : ' +
+      data.expiration +
+      '\n';
+  }
+
+  if (data.remainingTime) {
+    text +=
+      '⏳ เหลือเวลา : ' +
+      data.remainingTime +
+      '\n';
+  }
+
+  if (data.bailAmount) {
+    text +=
+      '💰 เงินประกันศาล : ' +
+      data.bailAmount +
+      ' บาท\n';
+  }
+
+  text += '\n';
+
+  if (data.status) {
+    text +=
+      (data.statusEmoji || '⚪') +
+      ' สถานะ : ' +
+      data.status +
+      '\n';
+  }
+
+  text +=
+    '⭐ ฐานข้อมูล : ' +
+    (
+      data.databaseChecked
+        ? '✅ตรวจพบ'
+        : '❌ตรวจไม่พบ'
+    ) +
+    '\n';
+
+  if (data.note) {
+    text +=
+      '⚠️ หมายเหตุ : ' +
+      data.note +
+      '\n';
+  }
+
+  if (data.warrantFileLink) {
+    text +=
+      '\n👀 ดูไฟล์หมายจับ :\n' +
+      data.warrantFileLink +
+      '\n';
+  }
+
+  return text;
+}
+
 function buildShareFlex(data) {
 
   // ==========================================================
