@@ -8,69 +8,97 @@
   <meta name="viewport"
         content="width=device-width, initial-scale=1.0">
 
-  <title>Warrants Checklist LIFF</title>
+  <title>Warrants Checklist Share</title>
+
+  <!-- LINE LIFF SDK -->
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
   <style>
 
     body {
       margin: 0;
-      min-height: 100vh;
-
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      padding: 30px 20px;
 
       font-family: Arial, sans-serif;
+
+      text-align: center;
 
       background: #FFF3D6;
     }
 
     .box {
+      max-width: 500px;
 
-      width: calc(100% - 40px);
-      max-width: 420px;
-
-      padding: 30px 20px;
-
-      box-sizing: border-box;
+      margin: auto;
 
       background: white;
 
+      padding: 25px 20px;
+
       border-radius: 16px;
 
-      text-align: center;
+      box-sizing: border-box;
 
-      box-shadow:
-        0 4px 20px rgba(0,0,0,0.08);
+      text-align: left;
     }
 
     h2 {
-
       margin-top: 0;
 
       color: #800020;
+
+      text-align: center;
     }
 
-    p {
+    #status {
+      margin-top: 15px;
+
+      font-size: 14px;
 
       color: #555;
 
-      line-height: 1.6;
+      white-space: pre-line;
+
+      line-height: 1.7;
+
+      word-break: break-word;
     }
 
-    .success {
-
-      margin-top: 20px;
+    .info {
+      margin-top: 15px;
 
       padding: 15px;
 
+      background: #FFF8E8;
+
       border-radius: 10px;
 
-      background: #E8F5E9;
+      font-size: 13px;
 
-      color: #2E7D32;
+      line-height: 1.7;
 
-      font-weight: bold;
+      word-break: break-word;
+    }
+
+    button {
+
+      width: 100%;
+
+      padding: 14px;
+
+      margin-top: 15px;
+
+      border: none;
+
+      border-radius: 10px;
+
+      background: #800020;
+
+      color: white;
+
+      font-size: 16px;
+
+      cursor: pointer;
     }
 
   </style>
@@ -82,19 +110,388 @@
 
   <div class="box">
 
-    <h2>📤 Warrants Checklist</h2>
+    <h2>📤 แชร์ข้อมูลบุคคล</h2>
 
-    <p>
-      LIFF Static Hosting
-    </p>
+    <div id="status">
+      กำลังตรวจสอบ LIFF...
+    </div>
 
-    <div class="success">
+    <div id="info"
+         class="info">
 
-      ✅ GitHub Pages ทำงานแล้ว
+      กำลังอ่านข้อมูลสภาพแวดล้อม...
 
     </div>
 
+    <button id="shareButton"
+            style="display:none;">
+
+      📤 ทดสอบเลือกผู้รับ
+
+    </button>
+
   </div>
+
+
+  <script>
+
+    // ============================================================
+    // LIFF ID
+    // ============================================================
+
+    const LIFF_ID =
+      '2011666291-rYHeeTHP';
+
+
+    // ============================================================
+    // Elements
+    // ============================================================
+
+    const statusElement =
+      document.getElementById('status');
+
+    const infoElement =
+      document.getElementById('info');
+
+    const shareButton =
+      document.getElementById('shareButton');
+
+
+    // ============================================================
+    // แสดงข้อมูล Diagnostic
+    // ============================================================
+
+    function showInfo(title, value) {
+
+      infoElement.innerHTML +=
+        '<div>' +
+        '<strong>' +
+        title +
+        ':</strong> ' +
+        String(value) +
+        '</div>';
+
+    }
+
+
+    // ============================================================
+    // ตรวจสอบ Environment
+    // ============================================================
+
+    function checkEnvironmentBeforeInit() {
+
+      infoElement.innerHTML = '';
+
+      showInfo(
+        'URL ปัจจุบัน',
+        window.location.href
+      );
+
+      showInfo(
+        'LIFF SDK โหลดแล้ว',
+        typeof liff !== 'undefined'
+      );
+
+      if (typeof liff !== 'undefined') {
+
+        try {
+
+          showInfo(
+            'LIFF Browser ก่อน init',
+            liff.isInClient()
+          );
+
+        } catch (error) {
+
+          showInfo(
+            'isInClient error',
+            error.message
+          );
+
+        }
+
+      }
+
+    }
+
+
+    // ============================================================
+    // INIT LIFF
+    // ============================================================
+
+    async function initLIFF() {
+
+      try {
+
+        statusElement.textContent =
+          '⏳ กำลังเรียก liff.init()...';
+
+
+        const initPromise =
+          liff.init({
+            liffId: LIFF_ID
+          });
+
+
+        const timeoutPromise =
+          new Promise((_, reject) => {
+
+            setTimeout(() => {
+
+              reject(
+                new Error(
+                  'liff.init() ใช้เวลานานเกิน 15 วินาที'
+                )
+              );
+
+            }, 15000);
+
+          });
+
+
+        await Promise.race([
+
+          initPromise,
+
+          timeoutPromise
+
+        ]);
+
+
+        // ========================================================
+        // INIT สำเร็จ
+        // ========================================================
+
+        statusElement.textContent =
+          '✅ liff.init() สำเร็จ';
+
+
+        infoElement.innerHTML = '';
+
+
+        showInfo(
+          'LIFF ID',
+          LIFF_ID
+        );
+
+
+        showInfo(
+          'URL ปัจจุบัน',
+          window.location.href
+        );
+
+
+        showInfo(
+          'LIFF Browser',
+          liff.isInClient()
+        );
+
+
+        showInfo(
+          'Login แล้ว',
+          liff.isLoggedIn()
+        );
+
+
+        showInfo(
+          'OS',
+          liff.getOS()
+        );
+
+
+        showInfo(
+          'LINE Version',
+          liff.getLineVersion()
+        );
+
+
+        showInfo(
+          'Share Target Picker',
+          liff.isApiAvailable(
+            'shareTargetPicker'
+          )
+        );
+
+
+        if (
+          liff.isApiAvailable(
+            'shareTargetPicker'
+          )
+        ) {
+
+          statusElement.textContent =
+            '✅ LIFF พร้อมใช้งาน\n' +
+            '✅ Share Target Picker พร้อมใช้งาน';
+
+
+          shareButton.style.display =
+            'block';
+
+        } else {
+
+          statusElement.textContent =
+            '⚠️ LIFF เชื่อมต่อสำเร็จ\n' +
+            'แต่ Share Target Picker ไม่พร้อมใช้งาน';
+
+        }
+
+
+      } catch (error) {
+
+        console.error(
+          'LIFF INIT ERROR:',
+          error
+        );
+
+
+        statusElement.textContent =
+          '❌ liff.init() ไม่สำเร็จ';
+
+
+        infoElement.innerHTML = '';
+
+
+        showInfo(
+          'LIFF ID',
+          LIFF_ID
+        );
+
+
+        showInfo(
+          'URL ปัจจุบัน',
+          window.location.href
+        );
+
+
+        try {
+
+          showInfo(
+            'LIFF Browser',
+            liff.isInClient()
+          );
+
+        } catch (e) {
+
+          showInfo(
+            'LIFF Browser',
+            'ตรวจสอบไม่ได้'
+          );
+
+        }
+
+
+        showInfo(
+          'Error name',
+          error.name || '-'
+        );
+
+
+        showInfo(
+          'Error message',
+          error.message || '-'
+        );
+
+
+        showInfo(
+          'Error code',
+          error.code || '-'
+        );
+
+
+        showInfo(
+          'Error object',
+          JSON.stringify(
+            error,
+            Object.getOwnPropertyNames(error),
+            2
+          )
+        );
+
+      }
+
+    }
+
+
+    // ============================================================
+    // ทดสอบ Share Target Picker
+    // ============================================================
+
+    async function shareTestMessage() {
+
+      try {
+
+        if (
+          !liff.isApiAvailable(
+            'shareTargetPicker'
+          )
+        ) {
+
+          alert(
+            'Share Target Picker ไม่พร้อมใช้งาน'
+          );
+
+          return;
+
+        }
+
+
+        statusElement.textContent =
+          '⏳ กำลังเปิดหน้าต่างเลือกผู้รับ...';
+
+
+        await liff.shareTargetPicker([
+
+          {
+            type: 'text',
+
+            text:
+              '📤 ทดสอบระบบแชร์ข้อมูลบุคคล\n' +
+              'Warrants Checklist'
+          }
+
+        ]);
+
+
+        statusElement.textContent =
+          '✅ ส่งข้อมูลเรียบร้อยแล้ว';
+
+
+      } catch (error) {
+
+        console.error(
+          'SHARE ERROR:',
+          error
+        );
+
+
+        statusElement.textContent =
+          '❌ แชร์ข้อมูลไม่สำเร็จ\n\n' +
+          (error.message || error);
+
+      }
+
+    }
+
+
+    // ============================================================
+    // ปุ่ม Share
+    // ============================================================
+
+    shareButton.addEventListener(
+      'click',
+      shareTestMessage
+    );
+
+
+    // ============================================================
+    // เริ่มระบบ
+    // ============================================================
+
+    checkEnvironmentBeforeInit();
+
+    initLIFF();
+
+  </script>
 
 </body>
 
