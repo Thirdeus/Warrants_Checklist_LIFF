@@ -1048,7 +1048,10 @@ function buildShareFlex(data) {
   if (
     personBox.contents.length > 0
   ) {
-    personBox.margin = 'md';
+    bodyContents.push({
+      type: 'spacer',
+      size: 'sm'
+    });
   
     bodyContents.push(
       personBox
