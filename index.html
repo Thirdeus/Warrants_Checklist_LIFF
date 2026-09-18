@@ -221,176 +221,239 @@
     }
 
 
-    // ============================================================
-    // สร้างข้อความสำหรับแชร์
-    // ============================================================
-
     function buildShareText(data) {
-
-      let text = '';
-
-      text += '🔎 ข้อมูลบุคคล\n';
-
-      text += '━━━━━━━━━━━━━━\n';
-
-
-      if (data.suspectName) {
-
-        text +=
+    
+      let reply = '';
+    
+      // จำนวนข้อมูล
+      const matchedCount =
+        data.matchedCount || 1;
+    
+      reply +=
+        '🔎 พบข้อมูลจำนวน ' +
+        matchedCount +
+        ' แถว\n';
+    
+      reply +=
+        '━━━━━━━━━━━━━━\n';
+    
+      // ชื่อ Sheet / แถว
+      if (
+        data.sheetName ||
+        data.rowNumber
+      ) {
+    
+        reply +=
+          '📄 ' +
+          (data.sheetName || '') +
+          ' / แถวที่ ' +
+          (data.rowNumber || '') +
+          '\n';
+    
+      }
+    
+      reply +=
+        '━━━━━━━━━━━━━━\n\n';
+    
+    
+      // =========================
+      // ข้อมูลบุคคล
+      // =========================
+    
+      if (
+        data.suspectName &&
+        String(data.suspectName).trim() !== ''
+      ) {
+    
+        reply +=
           '👤 ชื่อ-สกุล : ' +
           data.suspectName +
           '\n';
-
+    
       }
-
-
-      if (data.idCardNumber) {
-
-        text +=
+    
+      if (
+        data.idCardNumber &&
+        String(data.idCardNumber).trim() !== ''
+      ) {
+    
+        reply +=
           '🪪 เลขบัตร/Pass : ' +
           data.idCardNumber +
           '\n';
-
+    
       }
-
-
-      if (data.address) {
-
-        text +=
+    
+      if (
+        data.address &&
+        String(data.address).trim() !== ''
+      ) {
+    
+        reply +=
           '🏠 ที่อยู่ : ' +
           data.address +
           '\n';
-
+    
       }
-
-
-      text += '\n';
-
-
-      if (data.policeStation) {
-
-        text +=
+    
+      reply += '\n';
+    
+    
+      // =========================
+      // ข้อมูลหมายจับ
+      // =========================
+    
+      if (
+        data.policeStation &&
+        String(data.policeStation).trim() !== ''
+      ) {
+    
+        reply +=
           '🚨 หมายจับ : ' +
           data.policeStation +
           '\n';
-
+    
       }
-
-
-      if (data.warrantNumber) {
-
-        text +=
+    
+      if (
+        data.warrantNumber &&
+        String(data.warrantNumber).trim() !== ''
+      ) {
+    
+        reply +=
           '🔢 เลขที่หมายจับ : ' +
           data.warrantNumber +
           '\n';
-
+    
       }
-
-
-      if (data.offense) {
-
-        text +=
+    
+      if (
+        data.offense &&
+        String(data.offense).trim() !== ''
+      ) {
+    
+        reply +=
           '⚖️ ความผิดฐาน : ' +
           data.offense +
           '\n';
-
+    
       }
-
-
-      if (data.criminalCaseNumber) {
-
-        text +=
+    
+      if (
+        data.criminalCaseNumber &&
+        String(data.criminalCaseNumber).trim() !== ''
+      ) {
+    
+        reply +=
           '📁 เลขคดีที่ : ' +
           data.criminalCaseNumber +
           '\n';
-
+    
       }
-
-
-      text += '\n';
-
-
-      if (data.expiration) {
-
-        text +=
+    
+      reply += '\n';
+    
+    
+      // =========================
+      // อายุความ / เงินประกัน
+      // =========================
+    
+      if (
+        data.expiration &&
+        String(data.expiration).trim() !== ''
+      ) {
+    
+        reply +=
           '📅 หมดอายุความ : ' +
           data.expiration +
           '\n';
-
+    
       }
-
-
-      if (data.remainingTime) {
-
-        text +=
+    
+      if (
+        data.remainingTime &&
+        String(data.remainingTime).trim() !== ''
+      ) {
+    
+        reply +=
           '⏳ เหลือเวลา : ' +
           data.remainingTime +
           '\n';
-
+    
       }
-
-
-      if (data.bailAmount) {
-
-        text +=
+    
+      if (
+        data.bailAmount &&
+        String(data.bailAmount).trim() !== ''
+      ) {
+    
+        reply +=
           '💰 เงินประกันศาล : ' +
           data.bailAmount +
           ' บาท\n';
-
+    
       }
-
-
-      text += '\n';
-
-
-      if (data.status) {
-
-        let statusEmoji = '⚪';
-
-        if (
-          data.status === 'มีผลบังคับใช้'
-        ) {
-
-          statusEmoji = '🟢';
-
-        } else if (
-          data.status === 'รอคำสั่งศาล' ||
-          data.status === 'รอถอนหมาย'
-        ) {
-
-          statusEmoji = '🟡';
-
-        } else if (
-          data.status === 'หมายหมดอายุ' ||
-          data.status === 'ถอนหมาย'
-        ) {
-
-          statusEmoji = '🔴';
-
-        }
-
-
-        text +=
+    
+      reply += '\n';
+    
+    
+      // =========================
+      // สถานะ
+      // =========================
+    
+      if (
+        data.status &&
+        String(data.status).trim() !== ''
+      ) {
+    
+        const statusEmoji =
+          data.statusEmoji || '⚪';
+    
+        reply +=
           statusEmoji +
           ' สถานะ : ' +
           data.status +
           '\n';
-
+    
       }
-
-
-      if (data.note) {
-
-        text +=
+    
+    
+      // =========================
+      // หมายเหตุ
+      // =========================
+    
+      if (
+        data.note &&
+        String(data.note).trim() !== ''
+      ) {
+    
+        reply +=
           '⚠️ หมายเหตุ : ' +
           data.note +
           '\n';
-
+    
       }
-
-
-      return text.trim();
-
+    
+    
+      // =========================
+      // ไฟล์หมายจับ
+      // =========================
+    
+      if (
+        data.warrantFileLink &&
+        String(data.warrantFileLink).trim() !== ''
+      ) {
+    
+        reply +=
+          '\n👀 ดูไฟล์หมายจับ :\n' +
+          data.warrantFileLink +
+          '\n';
+    
+      }
+    
+    
+      return reply.trim();
+    
     }
 
 
