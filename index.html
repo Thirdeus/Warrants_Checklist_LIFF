@@ -1088,14 +1088,17 @@ function buildShareFlex(data) {
   if (
     expirationBox.contents.length > 0
   ) {
-
     bodyContents.push(
       expirationBox
     );
-
   }
-
-
+  
+  bodyContents.push({
+    type: 'separator',
+    margin: 'lg',
+    color: '#800020'
+  });
+  
   bodyContents.push(
     statusBox
   );
