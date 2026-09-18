@@ -337,31 +337,50 @@ async function sharePersonData(data) {
 
     shareButton.disabled = true;
 
-    // TEST: ส่งข้อความธรรมดาแทน Flex Message
-    const testMessage = {
-      type: 'text',
-      text: '🧪 ทดสอบระบบ Share Target Picker สำเร็จ'
+    // TEST 2: Flex Message แบบง่าย
+    const testFlex = {
+      type: 'flex',
+      altText: '🧪 ทดสอบ Flex Message',
+      contents: {
+        type: 'bubble',
+        body: {
+          type: 'box',
+          layout: 'vertical',
+          contents: [
+            {
+              type: 'text',
+              text: '🧪 ทดสอบ Flex Message',
+              weight: 'bold',
+              size: 'lg'
+            },
+            {
+              type: 'text',
+              text: 'Share Target Picker ทำงานปกติ'
+            }
+          ]
+        }
+      }
     };
 
     const result = await liff.shareTargetPicker([
-      testMessage
+      testFlex
     ]);
 
     console.log('SHARE RESULT:', result);
 
     if (result && result.status === 'success') {
       statusElement.textContent =
-        '✅ ทดสอบ Share Target Picker สำเร็จ';
+        '✅ ทดสอบ Flex Message สำเร็จ';
     } else {
       statusElement.textContent =
-        '⚠️ Share Target Picker ถูกเปิด แต่ยังไม่มีผลลัพธ์ success';
+        '⚠️ เลือกผู้รับแล้ว แต่ไม่พบผลลัพธ์ success';
     }
 
   } catch (error) {
     console.error('SHARE ERROR:', error);
 
     statusElement.textContent =
-      '❌ Share Target Picker ทดสอบไม่สำเร็จ\n\n' +
+      '❌ ทดสอบ Flex Message ไม่สำเร็จ\n\n' +
       'Error: ' +
       (error.message || String(error));
 
