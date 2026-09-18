@@ -326,60 +326,42 @@
     }
 
 
-async function sharePersonData(data) {
-  try {
-    if (!liff.isApiAvailable('shareTargetPicker')) {
-      throw new Error('Share Target Picker ไม่พร้อมใช้งาน');
+    async function sharePersonData(data) {
+      try {
+        if (!liff.isApiAvailable('shareTargetPicker')) {
+          throw new Error('Share Target Picker ไม่พร้อมใช้งาน');
+        }
+    
+        const flexMessage = buildShareFlex(data);
+    
+        statusElement.textContent =
+          '⏳ กำลังเปิดหน้าต่างเลือกผู้รับ...';
+    
+        shareButton.disabled = true;
+    
+        await liff.shareTargetPicker([flexMessage]);
+    
+        statusElement.textContent =
+          '✅ แชร์ข้อมูลเรียบร้อยแล้ว';
+    
+        setTimeout(() => {
+          try {
+            liff.closeWindow();
+          } catch (error) {
+            console.log('closeWindow error:', error);
+          }
+        }, 800);
+    
+      } catch (error) {
+        console.error('SHARE ERROR:', error);
+    
+        statusElement.textContent =
+          '❌ แชร์ข้อมูลไม่สำเร็จ\n\n' +
+          (error.message || String(error));
+    
+        shareButton.disabled = false;
+      }
     }
-
-    const flexMessage = buildShareFlex(data);
-
-    console.log('========== FLEX MESSAGE ==========');
-    console.log(JSON.stringify(flexMessage, null, 2));
-    console.log('==================================');
-
-    statusElement.textContent =
-      '⏳ กำลังเปิดหน้าต่างเลือกผู้รับ...';
-
-    shareButton.disabled = true;
-
-    const result = await liff.shareTargetPicker([
-      flexMessage
-    ]);
-
-    console.log('========== SHARE RESULT ==========');
-    console.log(result);
-    console.log('==================================');
-
-    if (result && result.status === 'success') {
-      statusElement.textContent =
-        '✅ แชร์ข้อมูลเรียบร้อยแล้ว';
-    } else {
-      statusElement.textContent =
-        '⚠️ การแชร์จบลง แต่ไม่ได้รับผลลัพธ์ success\n\n' +
-        JSON.stringify(result);
-    }
-
-  } catch (error) {
-
-    console.error('========== SHARE ERROR ==========');
-    console.error('name:', error.name);
-    console.error('message:', error.message);
-    console.error('code:', error.code);
-    console.error('status:', error.status);
-    console.error('cause:', error.cause);
-    console.error('full error:', error);
-    console.error('=================================');
-
-    statusElement.textContent =
-      '❌ แชร์ข้อมูลไม่สำเร็จ\n\n' +
-      'Name: ' + (error.name || '-') + '\n' +
-      'Code: ' + (error.code || '-') + '\n' +
-      'Message: ' + (error.message || String(error));
-
-    shareButton.disabled = false;
-  }
-}
 
     function buildShareText(data) {
 
