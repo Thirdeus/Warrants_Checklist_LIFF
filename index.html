@@ -1023,6 +1023,8 @@ function buildShareFlex(data) {
 
     size: 'sm',
 
+    weight: 'bold', 
+
     color: '#333333',
 
     margin: 'md',
@@ -1046,11 +1048,11 @@ function buildShareFlex(data) {
   if (
     personBox.contents.length > 0
   ) {
-
+    personBox.margin = 'md';
+  
     bodyContents.push(
       personBox
     );
-
   }
 
 
