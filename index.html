@@ -326,75 +326,48 @@
     }
 
 
-    async function sharePersonData(data) {
-    
-      try {
-    
-        if (
-          !liff.isApiAvailable(
-            'shareTargetPicker'
-          )
-        ) {
-    
-          throw new Error(
-            'Share Target Picker ไม่พร้อมใช้งาน'
-          );
-    
-        }
-    
-        const flexMessage =
-          buildShareFlex(data);
-    
-        statusElement.textContent =
-          '⏳ กำลังเปิดหน้าต่างเลือกผู้รับ...';
-    
-        shareButton.disabled =
-          true;
-    
-        await liff.shareTargetPicker([
-          flexMessage
-        ]);
-    
-        statusElement.textContent =
-          '✅ แชร์ข้อมูลเรียบร้อยแล้ว';
-    
-        setTimeout(() => {
-    
-          try {
-    
-            liff.closeWindow();
-    
-          } catch (error) {
-    
-            console.log(
-              'closeWindow error:',
-              error
-            );
-    
-          }
-    
-        }, 800);
-    
-      } catch (error) {
-    
-        console.error(
-          'SHARE ERROR:',
-          error
-        );
-    
-        statusElement.textContent =
-          '❌ แชร์ข้อมูลไม่สำเร็จ\n\n' +
-          (
-            error.message ||
-            String(error)
-          );
-    
-        shareButton.disabled =
-          false;
-    
-      }
-    
+async function sharePersonData(data) {
+  try {
+    if (!liff.isApiAvailable('shareTargetPicker')) {
+      throw new Error('Share Target Picker ไม่พร้อมใช้งาน');
     }
+
+    statusElement.textContent =
+      '⏳ กำลังเปิดหน้าต่างเลือกผู้รับ...';
+
+    shareButton.disabled = true;
+
+    // TEST: ส่งข้อความธรรมดาแทน Flex Message
+    const testMessage = {
+      type: 'text',
+      text: '🧪 ทดสอบระบบ Share Target Picker สำเร็จ'
+    };
+
+    const result = await liff.shareTargetPicker([
+      testMessage
+    ]);
+
+    console.log('SHARE RESULT:', result);
+
+    if (result && result.status === 'success') {
+      statusElement.textContent =
+        '✅ ทดสอบ Share Target Picker สำเร็จ';
+    } else {
+      statusElement.textContent =
+        '⚠️ Share Target Picker ถูกเปิด แต่ยังไม่มีผลลัพธ์ success';
+    }
+
+  } catch (error) {
+    console.error('SHARE ERROR:', error);
+
+    statusElement.textContent =
+      '❌ Share Target Picker ทดสอบไม่สำเร็จ\n\n' +
+      'Error: ' +
+      (error.message || String(error));
+
+    shareButton.disabled = false;
+  }
+}
 
     function buildShareText(data) {
 
