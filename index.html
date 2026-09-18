@@ -17,13 +17,13 @@
 
     body {
       margin: 0;
-      padding: 30px 20px;
+      padding: 20px;
 
       font-family: Arial, sans-serif;
 
-      text-align: center;
-
       background: #FFF3D6;
+
+      color: #333;
     }
 
     .box {
@@ -33,13 +33,11 @@
 
       background: white;
 
-      padding: 25px 20px;
+      padding: 20px;
 
       border-radius: 16px;
 
       box-sizing: border-box;
-
-      text-align: left;
     }
 
     h2 {
@@ -51,7 +49,7 @@
     }
 
     #status {
-      margin-top: 15px;
+      margin-top: 10px;
 
       font-size: 14px;
 
@@ -62,26 +60,51 @@
       line-height: 1.7;
 
       word-break: break-word;
+
+      text-align: center;
     }
 
-    .info {
-      margin-top: 15px;
+    #preview {
+      display: none;
 
-      padding: 15px;
+      margin-top: 20px;
+    }
 
-      background: #FFF8E8;
+    #personImage {
+      display: none;
 
-      border-radius: 10px;
+      width: 100%;
 
-      font-size: 13px;
+      max-height: 350px;
+
+      object-fit: contain;
+
+      border-radius: 12px;
+
+      background: #f5f5f5;
+
+      margin-bottom: 15px;
+    }
+
+    #personText {
+      white-space: pre-line;
+
+      font-size: 14px;
 
       line-height: 1.7;
 
       word-break: break-word;
+
+      background: #FFF8E8;
+
+      padding: 15px;
+
+      border-radius: 10px;
+
+      box-sizing: border-box;
     }
 
     button {
-
       width: 100%;
 
       padding: 14px;
@@ -101,6 +124,16 @@
       cursor: pointer;
     }
 
+    button:disabled {
+      opacity: 0.5;
+
+      cursor: not-allowed;
+    }
+
+    .error {
+      color: #b00020 !important;
+    }
+
   </style>
 
 </head>
@@ -113,22 +146,27 @@
     <h2>📤 แชร์ข้อมูลบุคคล</h2>
 
     <div id="status">
-      กำลังตรวจสอบ LIFF...
+      กำลังเชื่อมต่อ LINE...
     </div>
 
-    <div id="info"
-         class="info">
 
-      กำลังอ่านข้อมูลสภาพแวดล้อม...
+    <div id="preview">
+
+      <img
+        id="personImage"
+        alt="รูปบุคคล"
+      >
+
+      <div id="personText"></div>
+
+      <button
+        id="shareButton"
+        disabled
+      >
+        📤 แชร์
+      </button>
 
     </div>
-
-    <button id="shareButton"
-            style="display:none;">
-
-      📤 ทดสอบเลือกผู้รับ
-
-    </button>
 
   </div>
 
@@ -136,287 +174,336 @@
   <script>
 
     // ============================================================
-    // LIFF ID
+    // CONFIG
     // ============================================================
 
     const LIFF_ID =
       '2011666291-rYHeeTHP';
 
 
+    const API_URL =
+      'https://script.google.com/macros/s/AKfycbxBRjY7-cpAmIVQR8-Fv6FhDCj45T8uerfGQZ7jPyttsoteLV_kz-NqC6_5UwNLnso/exec';
+
+
     // ============================================================
-    // Elements
+    // ELEMENTS
     // ============================================================
 
     const statusElement =
       document.getElementById('status');
 
-    const infoElement =
-      document.getElementById('info');
+    const previewElement =
+      document.getElementById('preview');
+
+    const personImage =
+      document.getElementById('personImage');
+
+    const personText =
+      document.getElementById('personText');
 
     const shareButton =
       document.getElementById('shareButton');
 
 
     // ============================================================
-    // แสดงข้อมูล Diagnostic
+    // อ่าน Token จาก URL
     // ============================================================
 
-    function showInfo(title, value) {
+    function getShareToken() {
 
-      infoElement.innerHTML +=
-        '<div>' +
-        '<strong>' +
-        title +
-        ':</strong> ' +
-        String(value) +
-        '</div>';
+      const params =
+        new URLSearchParams(
+          window.location.search
+        );
+
+      return params.get('token') || '';
 
     }
 
 
     // ============================================================
-    // ตรวจสอบ Environment
+    // สร้างข้อความสำหรับแชร์
     // ============================================================
 
-    function checkEnvironmentBeforeInit() {
+    function buildShareText(data) {
 
-      infoElement.innerHTML = '';
+      let text = '';
 
-      showInfo(
-        'URL ปัจจุบัน',
-        window.location.href
-      );
+      text += '🔎 ข้อมูลบุคคล\n';
 
-      showInfo(
-        'LIFF SDK โหลดแล้ว',
-        typeof liff !== 'undefined'
-      );
+      text += '━━━━━━━━━━━━━━\n';
 
-      if (typeof liff !== 'undefined') {
 
-        try {
+      if (data.suspectName) {
 
-          showInfo(
-            'LIFF Browser ก่อน init',
-            liff.isInClient()
-          );
-
-        } catch (error) {
-
-          showInfo(
-            'isInClient error',
-            error.message
-          );
-
-        }
+        text +=
+          '👤 ชื่อ-สกุล : ' +
+          data.suspectName +
+          '\n';
 
       }
 
-    }
+
+      if (data.idCardNumber) {
+
+        text +=
+          '🪪 เลขบัตร/Pass : ' +
+          data.idCardNumber +
+          '\n';
+
+      }
 
 
-    // ============================================================
-    // INIT LIFF
-    // ============================================================
+      if (data.address) {
 
-    async function initLIFF() {
+        text +=
+          '🏠 ที่อยู่ : ' +
+          data.address +
+          '\n';
 
-      try {
-
-        statusElement.textContent =
-          '⏳ กำลังเรียก liff.init()...';
+      }
 
 
-        const initPromise =
-          liff.init({
-            liffId: LIFF_ID
-          });
+      text += '\n';
 
 
-        const timeoutPromise =
-          new Promise((_, reject) => {
+      if (data.policeStation) {
 
-            setTimeout(() => {
+        text +=
+          '🚨 หมายจับ : ' +
+          data.policeStation +
+          '\n';
 
-              reject(
-                new Error(
-                  'liff.init() ใช้เวลานานเกิน 15 วินาที'
-                )
-              );
-
-            }, 15000);
-
-          });
+      }
 
 
-        await Promise.race([
+      if (data.warrantNumber) {
 
-          initPromise,
+        text +=
+          '🔢 เลขที่หมายจับ : ' +
+          data.warrantNumber +
+          '\n';
 
-          timeoutPromise
-
-        ]);
-
-
-        // ========================================================
-        // INIT สำเร็จ
-        // ========================================================
-
-        statusElement.textContent =
-          '✅ liff.init() สำเร็จ';
+      }
 
 
-        infoElement.innerHTML = '';
+      if (data.offense) {
+
+        text +=
+          '⚖️ ความผิดฐาน : ' +
+          data.offense +
+          '\n';
+
+      }
 
 
-        showInfo(
-          'LIFF ID',
-          LIFF_ID
-        );
+      if (data.criminalCaseNumber) {
+
+        text +=
+          '📁 เลขคดีที่ : ' +
+          data.criminalCaseNumber +
+          '\n';
+
+      }
 
 
-        showInfo(
-          'URL ปัจจุบัน',
-          window.location.href
-        );
+      text += '\n';
 
 
-        showInfo(
-          'LIFF Browser',
-          liff.isInClient()
-        );
+      if (data.expiration) {
+
+        text +=
+          '📅 หมดอายุความ : ' +
+          data.expiration +
+          '\n';
+
+      }
 
 
-        showInfo(
-          'Login แล้ว',
-          liff.isLoggedIn()
-        );
+      if (data.remainingTime) {
+
+        text +=
+          '⏳ เหลือเวลา : ' +
+          data.remainingTime +
+          '\n';
+
+      }
 
 
-        showInfo(
-          'OS',
-          liff.getOS()
-        );
+      if (data.bailAmount) {
+
+        text +=
+          '💰 เงินประกันศาล : ' +
+          data.bailAmount +
+          ' บาท\n';
+
+      }
 
 
-        showInfo(
-          'LINE Version',
-          liff.getLineVersion()
-        );
+      text += '\n';
 
 
-        showInfo(
-          'Share Target Picker',
-          liff.isApiAvailable(
-            'shareTargetPicker'
-          )
-        );
+      if (data.status) {
 
+        let statusEmoji = '⚪';
 
         if (
-          liff.isApiAvailable(
-            'shareTargetPicker'
-          )
+          data.status === 'มีผลบังคับใช้'
         ) {
 
-          statusElement.textContent =
-            '✅ LIFF พร้อมใช้งาน\n' +
-            '✅ Share Target Picker พร้อมใช้งาน';
+          statusEmoji = '🟢';
 
+        } else if (
+          data.status === 'รอคำสั่งศาล' ||
+          data.status === 'รอถอนหมาย'
+        ) {
 
-          shareButton.style.display =
-            'block';
+          statusEmoji = '🟡';
 
-        } else {
+        } else if (
+          data.status === 'หมายหมดอายุ' ||
+          data.status === 'ถอนหมาย'
+        ) {
 
-          statusElement.textContent =
-            '⚠️ LIFF เชื่อมต่อสำเร็จ\n' +
-            'แต่ Share Target Picker ไม่พร้อมใช้งาน';
-
-        }
-
-
-      } catch (error) {
-
-        console.error(
-          'LIFF INIT ERROR:',
-          error
-        );
-
-
-        statusElement.textContent =
-          '❌ liff.init() ไม่สำเร็จ';
-
-
-        infoElement.innerHTML = '';
-
-
-        showInfo(
-          'LIFF ID',
-          LIFF_ID
-        );
-
-
-        showInfo(
-          'URL ปัจจุบัน',
-          window.location.href
-        );
-
-
-        try {
-
-          showInfo(
-            'LIFF Browser',
-            liff.isInClient()
-          );
-
-        } catch (e) {
-
-          showInfo(
-            'LIFF Browser',
-            'ตรวจสอบไม่ได้'
-          );
+          statusEmoji = '🔴';
 
         }
 
 
-        showInfo(
-          'Error name',
-          error.name || '-'
-        );
-
-
-        showInfo(
-          'Error message',
-          error.message || '-'
-        );
-
-
-        showInfo(
-          'Error code',
-          error.code || '-'
-        );
-
-
-        showInfo(
-          'Error object',
-          JSON.stringify(
-            error,
-            Object.getOwnPropertyNames(error),
-            2
-          )
-        );
+        text +=
+          statusEmoji +
+          ' สถานะ : ' +
+          data.status +
+          '\n';
 
       }
+
+
+      if (data.note) {
+
+        text +=
+          '⚠️ หมายเหตุ : ' +
+          data.note +
+          '\n';
+
+      }
+
+
+      return text.trim();
 
     }
 
 
     // ============================================================
-    // ทดสอบ Share Target Picker
+    // โหลดข้อมูลจาก Apps Script API
     // ============================================================
 
-    async function shareTestMessage() {
+    async function loadPersonData(token) {
+
+      if (!token) {
+
+        throw new Error(
+          'ไม่พบ Share Token'
+        );
+
+      }
+
+
+      statusElement.textContent =
+        '⏳ กำลังตรวจสอบ Token...';
+
+
+      const url =
+        API_URL +
+        '?api=share_person&token=' +
+        encodeURIComponent(token);
+
+
+      const response =
+        await fetch(url, {
+          method: 'GET'
+        });
+
+
+      if (!response.ok) {
+
+        throw new Error(
+          'API ตอบกลับ HTTP ' +
+          response.status
+        );
+
+      }
+
+
+      const data =
+        await response.json();
+
+
+      if (!data.success) {
+
+        throw new Error(
+          data.message ||
+          'ไม่สามารถอ่านข้อมูลบุคคลได้'
+        );
+
+      }
+
+
+      return data;
+
+    }
+
+
+    // ============================================================
+    // แสดงข้อมูล Preview
+    // ============================================================
+
+    function showPersonData(data) {
+
+      const shareText =
+        buildShareText(data);
+
+
+      personText.textContent =
+        shareText;
+
+
+      if (data.imageUrl) {
+
+        personImage.src =
+          data.imageUrl;
+
+        personImage.style.display =
+          'block';
+
+      } else {
+
+        personImage.style.display =
+          'none';
+
+      }
+
+
+      previewElement.style.display =
+        'block';
+
+
+      shareButton.disabled =
+        false;
+
+
+      statusElement.textContent =
+        '✅ ตรวจสอบข้อมูลเรียบร้อย\n' +
+        'ตรวจสอบข้อมูลก่อนกดแชร์';
+
+    }
+
+
+    // ============================================================
+    // แชร์ข้อมูลผ่าน Share Target Picker
+    // ============================================================
+
+    async function sharePersonData(data) {
 
       try {
 
@@ -426,34 +513,88 @@
           )
         ) {
 
-          alert(
+          throw new Error(
             'Share Target Picker ไม่พร้อมใช้งาน'
           );
 
-          return;
+        }
+
+
+        const shareText =
+          buildShareText(data);
+
+
+        const messages = [];
+
+
+        // --------------------------------------------------------
+        // รูปภาพ
+        // --------------------------------------------------------
+
+        if (data.imageUrl) {
+
+          messages.push({
+
+            type: 'image',
+
+            originalContentUrl:
+              data.imageUrl,
+
+            previewImageUrl:
+              data.imageUrl
+
+          });
 
         }
+
+
+        // --------------------------------------------------------
+        // ข้อความ
+        // --------------------------------------------------------
+
+        messages.push({
+
+          type: 'text',
+
+          text: shareText
+
+        });
 
 
         statusElement.textContent =
           '⏳ กำลังเปิดหน้าต่างเลือกผู้รับ...';
 
 
-        await liff.shareTargetPicker([
+        shareButton.disabled =
+          true;
 
-          {
-            type: 'text',
 
-            text:
-              '📤 ทดสอบระบบแชร์ข้อมูลบุคคล\n' +
-              'Warrants Checklist'
-          }
-
-        ]);
+        await liff.shareTargetPicker(
+          messages
+        );
 
 
         statusElement.textContent =
-          '✅ ส่งข้อมูลเรียบร้อยแล้ว';
+          '✅ แชร์ข้อมูลเรียบร้อยแล้ว';
+
+
+        // ปิด LIFF หลังแชร์สำเร็จ
+        setTimeout(() => {
+
+          try {
+
+            liff.closeWindow();
+
+          } catch (error) {
+
+            console.log(
+              'closeWindow error:',
+              error
+            );
+
+          }
+
+        }, 800);
 
 
       } catch (error) {
@@ -466,7 +607,14 @@
 
         statusElement.textContent =
           '❌ แชร์ข้อมูลไม่สำเร็จ\n\n' +
-          (error.message || error);
+          (
+            error.message ||
+            String(error)
+          );
+
+
+        shareButton.disabled =
+          false;
 
       }
 
@@ -474,20 +622,141 @@
 
 
     // ============================================================
-    // ปุ่ม Share
+    // Event ปุ่ม Share
     // ============================================================
 
     shareButton.addEventListener(
       'click',
-      shareTestMessage
+      async function() {
+
+        if (!window.personData) {
+
+          return;
+
+        }
+
+
+        await sharePersonData(
+          window.personData
+        );
+
+      }
     );
+
+
+    // ============================================================
+    // INIT LIFF
+    // ============================================================
+
+    async function initLIFF() {
+
+      try {
+
+        statusElement.textContent =
+          '⏳ กำลังเชื่อมต่อ LINE...';
+
+
+        await liff.init({
+
+          liffId:
+            LIFF_ID
+
+        });
+
+
+        // --------------------------------------------------------
+        // ตรวจสอบ Login
+        // --------------------------------------------------------
+
+        if (!liff.isLoggedIn()) {
+
+          statusElement.textContent =
+            '⏳ กำลังเข้าสู่ระบบ LINE...';
+
+          liff.login();
+
+          return;
+
+        }
+
+
+        // --------------------------------------------------------
+        // ตรวจสอบ Share Target Picker
+        // --------------------------------------------------------
+
+        if (
+          !liff.isApiAvailable(
+            'shareTargetPicker'
+          )
+        ) {
+
+          throw new Error(
+            'Share Target Picker ไม่พร้อมใช้งานบนอุปกรณ์นี้'
+          );
+
+        }
+
+
+        // --------------------------------------------------------
+        // อ่าน Token
+        // --------------------------------------------------------
+
+        const token =
+          getShareToken();
+
+
+        // --------------------------------------------------------
+        // เรียก API
+        // --------------------------------------------------------
+
+        const data =
+          await loadPersonData(
+            token
+          );
+
+
+        // เก็บข้อมูลไว้สำหรับปุ่ม Share
+        window.personData =
+          data;
+
+
+        // --------------------------------------------------------
+        // แสดง Preview
+        // --------------------------------------------------------
+
+        showPersonData(
+          data
+        );
+
+
+      } catch (error) {
+
+        console.error(
+          'LIFF ERROR:',
+          error
+        );
+
+
+        statusElement.classList.add(
+          'error'
+        );
+
+
+        statusElement.textContent =
+          '❌ ไม่สามารถโหลดข้อมูลได้\n\n' +
+          (
+            error.message ||
+            String(error)
+          );
+
+      }
+
+    }
 
 
     // ============================================================
     // เริ่มระบบ
     // ============================================================
-
-    checkEnvironmentBeforeInit();
 
     initLIFF();
 
