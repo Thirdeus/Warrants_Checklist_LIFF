@@ -326,42 +326,114 @@
     }
 
 
-    async function sharePersonData(data) {
-      try {
-        if (!liff.isApiAvailable('shareTargetPicker')) {
-          throw new Error('Share Target Picker ไม่พร้อมใช้งาน');
-        }
-    
-        const flexMessage = buildShareFlex(data);
-    
-        statusElement.textContent =
-          '⏳ กำลังเปิดหน้าต่างเลือกผู้รับ...';
-    
-        shareButton.disabled = true;
-    
-        await liff.shareTargetPicker([flexMessage]);
-    
-        statusElement.textContent =
-          '✅ แชร์ข้อมูลเรียบร้อยแล้ว';
-    
-        setTimeout(() => {
-          try {
-            liff.closeWindow();
-          } catch (error) {
-            console.log('closeWindow error:', error);
-          }
-        }, 800);
-    
-      } catch (error) {
-        console.error('SHARE ERROR:', error);
-    
-        statusElement.textContent =
-          '❌ แชร์ข้อมูลไม่สำเร็จ\n\n' +
-          (error.message || String(error));
-    
-        shareButton.disabled = false;
-      }
+async function sharePersonData(data) {
+
+  try {
+
+    if (
+      !liff.isApiAvailable(
+        'shareTargetPicker'
+      )
+    ) {
+      throw new Error(
+        'Share Target Picker ไม่พร้อมใช้งาน'
+      );
     }
+
+    const flexMessage =
+      buildShareFlex(data);
+
+    statusElement.textContent =
+      '⏳ กำลังเปิดหน้าต่างเลือกผู้รับ...';
+
+    shareButton.disabled = true;
+
+
+    // ============================================================
+    // เรียก Share Target Picker
+    // ============================================================
+
+    const result =
+      await liff.shareTargetPicker(
+        [flexMessage]
+      );
+
+
+    // ============================================================
+    // ตรวจสอบว่าผู้ใช้แชร์สำเร็จจริง
+    // ============================================================
+
+    if (
+      result &&
+      result.status === 'success'
+    ) {
+
+      // ----------------------------------------------------------
+      // ขั้นนี้จะเพิ่มการบันทึก ChatLogs
+      // ----------------------------------------------------------
+      // ยังไม่ใส่ API ตรงนี้จนกว่าจะเตรียมฝั่ง Apps Script
+      // เพื่อป้องกันการยิง API ไปยังปลายทางที่ยังไม่มี
+      // ----------------------------------------------------------
+
+
+      statusElement.textContent =
+        '✅ แชร์ข้อมูลเรียบร้อยแล้ว';
+
+
+      setTimeout(() => {
+
+        try {
+
+          liff.closeWindow();
+
+        } catch (error) {
+
+          console.log(
+            'closeWindow error:',
+            error
+          );
+
+        }
+
+      }, 800);
+
+    }
+
+    // ============================================================
+    // กรณีผู้ใช้ปิด / ยกเลิก Share Target Picker
+    // ============================================================
+
+    else {
+
+      statusElement.textContent =
+        'ยกเลิกการแชร์';
+
+      shareButton.disabled =
+        false;
+
+    }
+
+
+  } catch (error) {
+
+    console.error(
+      'SHARE ERROR:',
+      error
+    );
+
+    statusElement.textContent =
+      '❌ แชร์ข้อมูลไม่สำเร็จ\n\n' +
+      (
+        error.message ||
+        String(error)
+      );
+
+    shareButton.disabled =
+      false;
+
+  }
+
+}
 
     function buildShareText(data) {
 
